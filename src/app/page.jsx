@@ -1,3 +1,4 @@
+import Link from "next/link";
 import ThingAddForm from "./thing-add-form.jsx";
 
 async function getThings() {
@@ -15,7 +16,9 @@ export default async function Home() {
 			<h1>Thing Tracker</h1>
 			<ul>
 				{things.map(thing => (
-					<li key={thing._id}>{thing.name}</li>
+					<li key={thing._id}>
+						<Link href={`/thing/${thing._id}`}>{thing.name}</Link>
+					</li>
 				))}
 			</ul>
 
