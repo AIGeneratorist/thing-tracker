@@ -1,3 +1,5 @@
+import ThingAddForm from "./thing-add-form.jsx";
+
 async function getThings() {
 	const res = await fetch("http://localhost:3000/api/things");
 	if (!res.ok) {
@@ -16,6 +18,9 @@ export default async function Home() {
 					<li key={thing._id}>{thing.name}</li>
 				))}
 			</ul>
+
+			<h2>Add New Thing</h2>
+			<ThingAddForm />
 		</>
 	);
 }
