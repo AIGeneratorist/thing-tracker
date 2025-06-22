@@ -1,4 +1,5 @@
-import {thingsCollection} from "@/db/db.js";
+import {thingSchema, thingsCollection} from "@/db/db.js";
+import {parseInputWithSchema} from "@/utils/utils.js";
 
 export const GET = async () => {
 	try {
@@ -16,14 +17,7 @@ export const POST = async req => {
 			return Response.json({error: "Missing name"}, {status: 400});
 		}
 
-		const thingData = {
-			name: body.name,
-			type: body.type || null,
-			description: body.description || null,
-			favorited: body.favorited || false,
-			comments: body.comments || null,
-			props: body.props || {}
-		};
+		const thingData = parseInputWithSchema(body, thingSchema);
 		const thing = await thingsCollection.insertOne(thingData);
 
 		return Response.json(thing);

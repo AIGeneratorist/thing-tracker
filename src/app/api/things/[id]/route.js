@@ -1,7 +1,6 @@
 import {BSON, ObjectId} from "mongodb";
-import {thingsCollection} from "@/db/db.js";
-
-const allowedFields = ["name", "type", "description", "favorited", "comments", "props"];
+import {thingSchema, thingsCollection} from "@/db/db.js";
+import {parseInputWithSchema} from "@/utils/utils.js";
 
 export const GET = async (req, {params}) => {
 	const {id} = await params;
@@ -24,12 +23,7 @@ export const PATCH = async (req, {params}) => {
 	try {
 		const body = await req.json();
 
-		const newFields = allowedFields.reduce((acc, field) => {
-			if (body[field]) {
-				acc[field] = body[field];
-			}
-			return acc;
-		}, {});
+		const newFields = parseInputWithSchema(body, thingSchema, false);
 		if (Object.keys(newFields).length == 0) {
 			return Response.json({error: "Invalid field name(s)"}, {status: 400});
 		}
