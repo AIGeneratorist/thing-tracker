@@ -1,4 +1,5 @@
 import Link from "next/link";
+import SearchBox from "@/components/search-box.jsx";
 import ThingAddForm from "./thing-add-form.jsx";
 
 async function getThings() {
@@ -14,6 +15,8 @@ export default async function Home() {
 	return (
 		<>
 			<h1>Thing Tracker</h1>
+			<SearchBox />
+
 			<ul>
 				{things.map(thing => (
 					<li key={thing._id}>
