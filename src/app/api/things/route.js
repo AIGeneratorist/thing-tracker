@@ -1,10 +1,27 @@
 import {thingSchema, thingsCollection} from "@/db/db.js";
 import {parseInputWithSchema} from "@/utils/utils.js";
 
-export const GET = async () => {
+export const GET = async req => {
+	const rawPage = req.nextUrl.searchParams.get("page");
+	let page;
+	if (rawPage) {
+		page = parseInt(rawPage);
+		if (isNaN(page) || page < 1) {
+			return Response.json({error: "Invalid page"}, {status: 400});
+		}
+	} else {
+		page = 1;
+	}
+
 	try {
-		const things = await thingsCollection.find().toArray();
-		return Response.json(things);
+		const [results, count] = await Promise.all([
+			thingsCollection.find({}, {
+				limit: 25,
+				skip: (page - 1) * 25
+			}).toArray(),
+			thingsCollection.countDocuments()
+		]);
+		return Response.json({results, count});
 	} catch (err) {
 		return Response.json({error: `Server error: ${err}`}, {status: 500});
 	}
