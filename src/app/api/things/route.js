@@ -13,11 +13,35 @@ export const GET = async req => {
 		page = 1;
 	}
 
+	const rawSort = req.nextUrl.searchParams.get("sort");
+	let sortField;
+	let sortOrder;
+	if (rawSort) {
+		if (rawSort.endsWith("Desc")) {
+			sortField = rawSort.slice(0, -4);
+			sortOrder = "desc";
+		} else if (rawSort.endsWith("Asc")) {
+			sortField = rawSort.slice(0, -3);
+			sortOrder = "asc";
+		} else {
+			sortField = rawSort;
+			sortOrder = "asc";
+		}
+
+		if (!thingSchema[sortField] && sortField != "_id") {
+			return Response.json({error: "Invalid sort field"}, {status: 400});
+		}
+	} else {
+		sortField = "_id";
+		sortOrder = "desc";
+	}
+
 	try {
 		const [results, count] = await Promise.all([
 			thingsCollection.find({}, {
 				limit: 25,
-				skip: (page - 1) * 25
+				skip: (page - 1) * 25,
+				sort: [[sortField, sortOrder]]
 			}).toArray(),
 			thingsCollection.countDocuments()
 		]);
