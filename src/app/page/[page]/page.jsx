@@ -4,8 +4,8 @@ import SearchBox from "@/components/search-box.jsx";
 import ViewOptions from "@/components/view-options.jsx";
 import ThingAddForm from "../../thing-add-form.jsx";
 
-async function getThings(page, {sort = "_idDesc"}) {
-	const res = await fetch(`http://localhost:3000/api/things?page=${page}&sort=${sort}`);
+async function getThings(page, {sort = "_idDesc", limit = 25}) {
+	const res = await fetch(`http://localhost:3000/api/things?page=${page}&sort=${sort}&limit=${limit}`);
 	if (!res.ok) {
 		throw new Error("Failed to fetch things");
 	}
@@ -14,11 +14,12 @@ async function getThings(page, {sort = "_idDesc"}) {
 
 export default async function LinkPageView({params, searchParams}) {
 	const {page} = await params;
-	const {sort} = await searchParams;
+	const {sort, limit} = await searchParams;
 
 	const parsedPage = parseInt(page);
+	const parsedLimit = limit && parseInt(limit);
 
-	const res = await getThings(parsedPage, {sort});
+	const res = await getThings(parsedPage, {sort, limit: parsedLimit});
 	const things = res.results;
 	const count = res.count;
 
@@ -34,10 +35,10 @@ export default async function LinkPageView({params, searchParams}) {
 					</li>
 				))}
 			</ul>
-			<Paginator page={parsedPage} count={count} prefix="/" />
+			<Paginator page={parsedPage} count={count} limit={parsedLimit} prefix="/" />
 
 			<h2>View Options</h2>
-			<ViewOptions sort={sort} prefix="/" />
+			<ViewOptions sort={sort} limit={parsedLimit} prefix="/" />
 
 			<h2>Add New Thing</h2>
 			<ThingAddForm />
