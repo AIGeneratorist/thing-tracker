@@ -1,4 +1,5 @@
 import {thingSchema, thingsCollection} from "@/db/db.js";
+import {parseQueryParams} from "@/utils/utils.js";
 
 function parseSearchQuery(query) {
 	const filters = {};
@@ -36,17 +37,27 @@ export const GET = async (req, {params}) => {
 	const {query} = await params;
 	const {filters, defaultFilterWords} = parseSearchQuery(query);
 	if (Object.keys(filters).length == 0 && defaultFilterWords.length == 0) {
-		return Response.json([]);
+		return Response.json({results: [], count: 0});
 	}
 
+	const parseRes = parseQueryParams(req, thingSchema);
+	if (parseRes.error) {
+		return Response.json(parseRes, {status: 400});
+	}
+
+	const filterOptions = {
+		...filters,
+		name: {
+			$regex: new RegExp(defaultFilterWords.join(" "), "i")
+		}
+	};
+
 	try {
-		const things = await thingsCollection.find({
-			...filters,
-			name: {
-				$regex: new RegExp(defaultFilterWords.join(" "), "i")
-			}
-		}).toArray();
-		return Response.json(things);
+		const [results, count] = await Promise.all([
+			thingsCollection.find(filterOptions, parseRes.data).toArray(),
+			thingsCollection.countDocuments(filterOptions)
+		]);
+		return Response.json({results, count});
 	} catch (err) {
 		return Response.json({error: `Server error: ${err}`}, {status: 500});
 	}
