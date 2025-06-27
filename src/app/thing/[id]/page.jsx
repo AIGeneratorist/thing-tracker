@@ -1,3 +1,5 @@
+import ThingDeleteContainer from "./thing-delete-container.jsx";
+
 async function getThing(id) {
 	const res = await fetch(`http://localhost:3000/api/things/${id}`);
 	if (!res.ok) {
@@ -35,6 +37,9 @@ export default async function ThingView({params}) {
 					<i>No properties</i>
 				)
 			}
+
+			<h2>Manage Thing</h2>
+			<ThingDeleteContainer thingId={thing._id} />
 		</>
 	);
 }
